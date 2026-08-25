@@ -94,9 +94,17 @@ def test_the_interval_is_stable_across_seeds_at_full_resamples():
 
     Convergence is the claim, so it is asserted at full resamples and
     contrasted below with the small-resample case where seeds do diverge.
+
+    Compared with a tolerance rather than exactly: the resample sets converge
+    to the same percentiles, but summing the same floats in a different order
+    differs in the last bit. Exact equality passed on Windows and failed on
+    the Linux CI runner -- the opposite of the property being asserted.
     """
     v = [0.2, 0.5, 0.7, 0.9] * 25
-    assert bootstrap_ci(v, seed=1) == bootstrap_ci(v, seed=2)
+    a = bootstrap_ci(v, seed=1)
+    b = bootstrap_ci(v, seed=2)
+    assert a[0] == pytest.approx(b[0], abs=1e-9)
+    assert a[1] == pytest.approx(b[1], abs=1e-9)
 
 
 def test_too_few_resamples_makes_the_interval_seed_dependent():
